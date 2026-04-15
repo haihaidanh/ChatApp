@@ -1,7 +1,10 @@
 package com.example.chat_app1204.data.repository
 
+import android.content.Context
+import android.net.Uri
 import com.example.chat_app1204.data.model.Message
 import com.example.chat_app1204.data.model.MessageRequest
+import com.example.chat_app1204.data.model.UrlResponse
 import com.example.chat_app1204.data.source.remote.RemoteDataSource
 import javax.inject.Inject
 
@@ -31,6 +34,10 @@ class ChatRepositoryImpl @Inject constructor(
 
     override suspend fun seenMessage(userId: String, groupId: String?, friendId: String?) {
         remoteDataSource.seenMessage(userId, groupId, friendId)
+    }
+
+    override suspend fun sendImageMessage(uri: Uri, context: Context): UrlResponse {
+        return remoteDataSource.sendImageMessage(uri, context)
     }
 
 }

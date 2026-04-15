@@ -1,0 +1,22 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="app_name">chat_app1204</string>
+    <string name="open">Mở</string>
+    <string name="close">Đóng</string>
+    <string name="logout">Đăng xuất</string>
+    <string name="setting">Cài đặt</string>
+    <string name="create_group">Tạo nhóm</string>
+    <string name="home">Trang chủ</string>
+    <string name="notification">Thông báo</string>
+    <string name="profile">Thông tin </string>
+    <string name="all">Tất cả</string>
+    <string name="chat">Nhắn tin</string>
+    <string name="groups">Nhóm</string>
+    <string name="type_message">Soạn tin nhắn...</string>
+    <string name="search">Tìm kiếm...</string>
+    <string name="notifications">Thông báo</string>
+    <string name="no_notifications_yet">Chưa có thông báo nào</string>
+    <string name="setting_header">Cài đặt hệ thống</string>
+    <string name="username">Tên đăng nhập</string>
+    <string name="password">Mật khẩu</string>
+</resources>

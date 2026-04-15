@@ -1,15 +1,15 @@
 package com.example.chat_app1204.ui.fragment
 
 import android.content.Intent
+import android.net.Uri
 import android.os.Bundle
 import android.util.Log
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
+import androidx.activity.result.contract.ActivityResultContracts
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.viewModels
-import androidx.recyclerview.widget.LinearLayoutManager
-import androidx.recyclerview.widget.RecyclerView
 import com.bumptech.glide.Glide
 import com.example.chat_app1204.R
 import com.example.chat_app1204.data.enums.MessageCategory
@@ -27,9 +27,17 @@ import dagger.hilt.android.AndroidEntryPoint
 class ChatDetailFragment : Fragment() {
 
     private lateinit var mBinding: FragmentChatDetailBinding
-    private val viewModel: HomeViewModel by viewModels()
+    private val homeViewModel: HomeViewModel by viewModels()
     private val chatDetailViewModel: ChatDetailViewModel by viewModels()
     private lateinit var chatAdapter: ChatDetailAdapter
+    private val imageUrl: Uri? = null
+
+    private val pickImage =
+        registerForActivityResult(ActivityResultContracts.GetContent()) { uri ->
+            if (uri != null) {
+                chatDetailViewModel.sendImageMessage(uri, requireContext())
+            }
+        }
 
     override fun onCreateView(
         inflater: LayoutInflater,
@@ -46,19 +54,19 @@ class ChatDetailFragment : Fragment() {
         var avatar: String? = null
         val conservation = arguments?.getSerializable("conversation") as? Conversation
 
-        viewModel.getAvatarUrl()
-        viewModel.avatar.observe(viewLifecycleOwner) { avatarUrl ->
+        homeViewModel.getAvatarUrl()
+        homeViewModel.avatar.observe(viewLifecycleOwner) { avatarUrl ->
             avatar = avatarUrl
         }
 
-        val receiverId = if (viewModel.getUserId() == conservation?.senderId) {
+        val receiverId = if (homeViewModel.getUserId() == conservation?.senderId) {
             conservation?.receiverId
         } else {
             conservation?.senderId
         }
 
         conservation?.let {
-            viewModel.seenMessage(
+            homeViewModel.seenMessage(
                 it.groupId,
                 receiverId,
             )
@@ -78,9 +86,12 @@ class ChatDetailFragment : Fragment() {
             }
         }
 
-        viewModel.getUserId()?.let {
+        homeViewModel.getUserId()?.let {
             chatAdapter = ChatDetailAdapter(
-                currentUserId = it
+                currentUserId = it,
+                onImageClick = { imageUrl ->
+
+                }
             )
         }
 
@@ -96,7 +107,7 @@ class ChatDetailFragment : Fragment() {
         mBinding.username.text = conservation?.name ?: ""
 
         chatDetailViewModel.getMessages(
-            userId = viewModel.getUserId() ?: "",
+            userId = homeViewModel.getUserId() ?: "",
             friendId = receiverId,
             groupId = conservation?.groupId
         )
@@ -110,9 +121,7 @@ class ChatDetailFragment : Fragment() {
 
             }
         }
-
-        //Log.d("hai", "Receiver ID: $receiverId")
-        viewModel.getUserId()?.let { userId ->
+        homeViewModel.getUserId()?.let { userId ->
             mBinding.btnSend.setOnClickListener {
                 Log.d("hai", avatar ?: "Avatar URL is null")
                 val message = mBinding.etMessage.text.toString()
@@ -145,6 +154,24 @@ class ChatDetailFragment : Fragment() {
                 mBinding.chatOption.visibility = View.VISIBLE
                 mBinding.stickerOption.visibility = View.GONE
                 mBinding.imageOption.visibility = View.GONE
+            }
+        }
+
+        mBinding.imageOption.setOnClickListener {
+            pickImage.launch("image/*")
+        }
+
+        chatDetailViewModel.imageUrl.observe(viewLifecycleOwner) { urlResponse ->
+            homeViewModel.getUserId()?.let { userId ->
+                chatDetailViewModel.sendMessage(
+                    senderId = userId,
+                    receiverId = receiverId,
+                    type = MessageType.IMAGE.name,
+                    groupId = conservation?.groupId,
+                    avatarUrl = avatar ?: "",
+                    category = MessageCategory.PERSONAL.name,
+                    message = urlResponse.url
+                )
             }
         }
     }

@@ -13,7 +13,7 @@ import com.example.chat_app1204.ui.viewmodel.HomeViewModel
 import dagger.hilt.android.AndroidEntryPoint
 
 @AndroidEntryPoint
-class LogInActivity : AppCompatActivity() {
+class LogInActivity : BaseActivity() {
 
     private lateinit var mBinding: ActivityLogInBinding
     private val viewModel: AuthViewModel by viewModels()

@@ -11,24 +11,41 @@
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:orientation="vertical">
+
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="Đăng nhập"
+            android:textSize="30sp"
+            android:fontFamily="@font/playwriteie_variablefont_wght"
+            android:textStyle="bold"/>
+
         <EditText
             android:id="@+id/edtUsername"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:hint="Username"
+            android:autofillHints="username"
+            android:hint="@string/username"
             android:inputType="textEmailAddress"
             android:maxLines="1"
-            android:minHeight="48dp" />
+            android:minHeight="48dp"
+            android:paddingStart="20dp"
+            android:paddingEnd="10dp"
+            android:background="@drawable/bg_edt_selector"/>
 
         <EditText
             android:id="@+id/edtPassword"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:layout_marginTop="12dp"
-            android:hint="Password"
+            android:autofillHints="password"
+            android:hint="@string/password"
             android:inputType="textPassword"
             android:maxLines="1"
-            android:minHeight="48dp" />
+            android:minHeight="48dp"
+            android:background="@drawable/bg_edt_selector"
+            android:paddingStart="20dp"
+            android:paddingEnd="10dp"/>
 
         <RelativeLayout
             android:layout_width="match_parent"

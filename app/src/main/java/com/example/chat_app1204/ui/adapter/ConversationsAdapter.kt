@@ -29,6 +29,7 @@ class ConversationsAdapter(
         fun bind(item: Conversation) {
             tvUserName.text = item.name
             if (item.groupId != null) {
+                Log.d("hai", "Last message: ${item.lastMessage}")
                 tvLastMessage.text = item.lastMessage
             } else {
                 tvLastMessage.text =

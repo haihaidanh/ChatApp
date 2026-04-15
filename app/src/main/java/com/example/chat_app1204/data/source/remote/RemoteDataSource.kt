@@ -1,17 +1,19 @@
 package com.example.chat_app1204.data.source.remote
 
+import android.content.Context
+import android.net.Uri
 import android.util.Log
-import com.example.chat_app1204.data.enums.MessageCategory
-import com.example.chat_app1204.data.enums.MessageType
 import com.example.chat_app1204.data.model.Conversation
 import com.example.chat_app1204.data.model.GroupInfo
 import com.example.chat_app1204.data.model.Message
 import com.example.chat_app1204.data.model.MessageRequest
 import com.example.chat_app1204.data.model.NotificationRequest
+import com.example.chat_app1204.data.model.UrlResponse
 import com.example.chat_app1204.data.model.User
 import com.example.chat_app1204.data.model.UserResponse
 import com.example.chat_app1204.data.request.LogInRequest
 import com.example.chat_app1204.data.source.local.MyPreference
+import com.example.chat_app1204.data.utils.uriToMultipart
 import com.google.firebase.database.DataSnapshot
 import com.google.firebase.database.DatabaseError
 import com.google.firebase.database.FirebaseDatabase
@@ -79,7 +81,6 @@ class RemoteDataSource @Inject constructor(
     suspend fun getFriendOnline(callback: (List<User>) -> Unit) {
         val result = appService.getFriendList()
         if (result.isSuccessful) {
-
             val users = result.body()?.friends!!.map {
                 User(
                     id = it.friendId,
@@ -139,7 +140,6 @@ class RemoteDataSource @Inject constructor(
                             val list =
                                 snapshot.children.mapNotNull { it.getValue(User::class.java) }
                                     .filter { it.online }
-                            Log.d("hai", "Friend list: $list")
                             callback(list)
                         }
 
@@ -164,19 +164,15 @@ class RemoteDataSource @Inject constructor(
         friendsRef.addListenerForSingleValueEvent(object : ValueEventListener {
             override fun onDataChange(friendSnapshot: DataSnapshot) {
 
-                Log.d("hai", userId)
                 val friendIds = friendSnapshot.children.mapNotNull { it.value }
-                Log.d("hai", "Friend IDs: $friendIds")
                 usersRef.addListenerForSingleValueEvent(object : ValueEventListener {
                     override fun onDataChange(userSnapshot: DataSnapshot) {
 
                         val friendList = userSnapshot.children
                             .mapNotNull { it.getValue(User::class.java) }
                             .filter { user ->
-                                friendIds.contains(user.id) // ⚠️ user phải có id
+                                friendIds.contains(user.id)
                             }
-
-                        Log.d("hai", "Friend list: $friendList")
                         callback(friendList)
                     }
 
@@ -193,7 +189,7 @@ class RemoteDataSource @Inject constructor(
         myPreference.clearInfo()
     }
 
-    fun getConversationList(userId: String, callback: (List<Conversation>) -> Unit) {
+    fun getFriendConversations(userId: String, callback: (List<Conversation>) -> Unit) {
         val userRef = firebaseDatabase.reference.child("users").child(userId).child("friends")
 
         userRef.addValueEventListener(object : ValueEventListener {
@@ -204,7 +200,6 @@ class RemoteDataSource @Inject constructor(
                     val conversationList = friendIds.map { friendId ->
                         val chatId =
                             if (userId < friendId) "$userId-$friendId" else "$friendId-$userId"
-                        Log.d("hai", "Chat ID: $chatId")
                         val conversationSnapshot = firebaseDatabase.reference
                             .child("conversations")
                             .child(chatId)
@@ -223,7 +218,6 @@ class RemoteDataSource @Inject constructor(
                     }.filterNotNull()
 
                     withContext(Dispatchers.Main) {
-                        Log.d("hai", "Conversation list: $conversationList")
                         callback(conversationList)
                     }
                 }
@@ -233,51 +227,35 @@ class RemoteDataSource @Inject constructor(
         })
     }
 
-    fun getConversationList2(userId: String, callback: (List<Conversation>) -> Unit) {
-        val userRef = firebaseDatabase.reference.child("users").child(userId).child("friends")
+    fun getGroupConversations(userId: String, callback: (List<Conversation>) -> Unit) {
+        val database = firebaseDatabase.reference
 
-        userRef.addValueEventListener(object : ValueEventListener {
-            override fun onDataChange(snapshot: DataSnapshot) {
-                val friendIds = snapshot.children.mapNotNull { it.getValue(String::class.java) }
+        val friendsRef = database.child("users").child(userId).child("friends")
+        val groupsRef = database.child("users").child(userId).child("groups")
 
-                CoroutineScope(Dispatchers.IO).launch {
-                    // Sử dụng async để tạo danh sách các công việc chạy song song
-                    val deferredConversations = friendIds.map { friendId ->
-                        async {
-                            try {
-                                val chatId = if (userId < friendId) "$userId-$friendId" else "$friendId-$userId"
+        CoroutineScope(Dispatchers.IO).launch {
+            try {
+                val groupsTask = groupsRef.get()
+                val groupIds = groupsTask.await().children.mapNotNull { it.key }
 
-                                // Chạy 2 request lấy data của 1 dòng chat cùng lúc
-                                val convTask = firebaseDatabase.reference.child("conversations").child(chatId).get()
-                                val userTask = firebaseDatabase.reference.child("users").child(friendId).get()
-
-                                val convSnap = convTask.await()
-                                val userSnap = userTask.await()
-
-                                val conversation = convSnap.getValue(Conversation::class.java)
-                                val friend = userSnap.getValue(User::class.java)
-
-                                conversation?.apply {
-                                    avatarUrl = friend?.avatarUrl
-                                    name = friend?.name
-                                }
-                            } catch (e: Exception) {
-                                null
-                            }
-                        }
-                    }
-
-                    // Đợi tất cả các "mảnh ghép" hoàn thành cùng lúc
-                    val conversationList = deferredConversations.awaitAll().filterNotNull()
-
-                    withContext(Dispatchers.Main) {
-                        callback(conversationList)
+                val groupConvs = groupIds.map { groupId ->
+                    async {
+                        fetchGroupData(groupId)
                     }
                 }
-            }
+                val allList =groupConvs.awaitAll()
+                    .filterNotNull()
+                    .sortedByDescending { it.lastMessageTime ?: 0L }
 
-            override fun onCancelled(error: DatabaseError) {}
-        })
+                withContext(Dispatchers.Main) {
+                    callback(allList)
+                }
+            } catch (e: Exception) {
+                Log.e("hai", "Error: ${e.message}")
+            }
+        }
+
+
     }
 
     fun getAllConversations(userId: String, callback: (List<Conversation>) -> Unit) {
@@ -456,7 +434,7 @@ class RemoteDataSource @Inject constructor(
         val chatId = if (senderId < receiverId!!) "$senderId-$receiverId" else "$receiverId-$senderId"
         Log.d("hai", "Chat ID for receiving messages: $chatId")
         firebaseDatabase.reference.child("messages").child(chatId)
-            .orderByChild("timestamp") // Sắp xếp theo thời gian tăng dần
+            .orderByChild("timestamp")
             .addValueEventListener(object : ValueEventListener {
                 override fun onDataChange(snapshot: DataSnapshot) {
                     val messageList = mutableListOf<Message>()
@@ -464,7 +442,6 @@ class RemoteDataSource @Inject constructor(
                     for (data in snapshot.children) {
                         val msg = data.getValue(Message::class.java)
                         if (msg != null) {
-                            // Gán key của Firebase vào trường id nếu bạn cần dùng
                             messageList.add(msg.copy(id = data.key ?: ""))
                         }
                     }
@@ -495,23 +472,14 @@ class RemoteDataSource @Inject constructor(
             seen = true,
             lastMessage = ""
         )
-
-        // Tạo một Map để cập nhật dữ liệu ở nhiều nơi cùng lúc (Atomic Update)
         val updates = hashMapOf<String, Any>()
-
-        // 1. Thêm vào node groups
         updates["/groups/$groupId"] = groupData
-
-        // 2. Thêm vào node conversations
         updates["/conversations/$groupId"] = conversationData
-
-        // 3. Cập nhật danh sách group cho TỪNG thành viên
         memberIds.forEach { userId ->
             Log.d("MainActivity", "Updating group for user: $userId")
             updates["/users/$userId/groups/$groupId"] = true
         }
 
-        // Thực hiện update một lần duy nhất
         database.updateChildren(updates).addOnCompleteListener { task ->
             if (task.isSuccessful) {
                 Log.d("hai", "Tạo group thành công!")
@@ -557,6 +525,20 @@ class RemoteDataSource @Inject constructor(
         val snapshot = messagesRef.get().await()
         snapshot.children.forEach { messageSnapshot ->
             messageSnapshot.ref.updateChildren(mapOf("seen" to true))
+        }
+    }
+
+    suspend fun sendImageMessage(
+        uri: Uri,
+        context: Context
+    ): UrlResponse {
+        val response = appService.sendImageMessage(
+            uriToMultipart(context, uri)
+        )
+        if (response.isSuccessful) {
+            return response.body() ?: throw Exception("Empty response")
+        } else {
+            throw Exception("Failed to send image message: ${response.code()} ${response.message()}")
         }
     }
 }

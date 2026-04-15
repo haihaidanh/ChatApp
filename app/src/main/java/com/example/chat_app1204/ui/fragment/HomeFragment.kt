@@ -65,19 +65,17 @@ class HomeFragment : Fragment() {
         mBinding.chip.setOnCheckedChangeListener { _, checkedId ->
             when (checkedId) {
                 R.id.chipAll -> {
-
+                    viewModel.getConversationList()
                 }
 
                 R.id.chipChat -> {
-                    mBinding.activeRecyclerView.visibility = View.VISIBLE
-                    mBinding.userRecyclerView.visibility = View.GONE
+                    viewModel.getFriendsConversation()
                 }
                 R.id.chipGroup -> {
-                    mBinding.activeRecyclerView.visibility = View.VISIBLE
-                    mBinding.userRecyclerView.visibility = View.GONE
+                    viewModel.getGroupConversation()
                 }
                 else -> {
-
+                    viewModel.getConversationList()
                 }
             }
         }
@@ -105,8 +103,6 @@ class HomeFragment : Fragment() {
         viewModel.friendList.observe(viewLifecycleOwner) { friendList ->
             friendListAdapter.submitList(friendList)
         }
-
-        Log.d("hai", viewModel.getUserId() ?: "User ID is null")
 
         mBinding.userRecyclerView.adapter = conversationsAdapter
         viewModel.conversation.observe(viewLifecycleOwner) { conversationList ->

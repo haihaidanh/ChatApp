@@ -17,6 +17,7 @@ import androidx.navigation.fragment.NavHostFragment
 import androidx.navigation.ui.setupWithNavController
 import com.bumptech.glide.Glide
 import com.example.chat_app1204.R
+import com.example.chat_app1204.data.source.local.MyPreference
 import com.example.chat_app1204.databinding.ActivityMainBinding
 import com.example.chat_app1204.databinding.DialogCreateGroupBinding
 import com.example.chat_app1204.ui.adapter.InviteFriendAdapter
@@ -25,13 +26,14 @@ import com.example.chat_app1204.ui.viewmodel.HomeViewModel
 import dagger.hilt.android.AndroidEntryPoint
 
 @AndroidEntryPoint
-class MainActivity : AppCompatActivity() {
+class MainActivity : BaseActivity() {
 
     private lateinit var drawerToggle: ActionBarDrawerToggle
     private val viewModel: HomeViewModel by viewModels()
     private lateinit var mBinding: ActivityMainBinding
     private val groupViewModel: GroupViewModel by viewModels()
     private lateinit var inviteFriendAdapter: InviteFriendAdapter
+    private lateinit var myPreference: MyPreference
 
     @SuppressLint("MissingInflatedId")
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -39,6 +41,14 @@ class MainActivity : AppCompatActivity() {
         enableEdgeToEdge()
         mBinding = ActivityMainBinding.inflate(layoutInflater)
         setContentView(mBinding.root)
+
+        myPreference = MyPreference(this)
+        val token = myPreference.getAccessToken()
+        if (token == null) {
+            startActivity(Intent(this, LogInActivity::class.java))
+            finish()
+            return
+        }
 
         val navHostFragment =
             supportFragmentManager.findFragmentById(R.id.fragmentContainerView) as NavHostFragment
@@ -60,13 +70,6 @@ class MainActivity : AppCompatActivity() {
         setSupportActionBar(mBinding.toolbar)
         headerDrawer()
 
-
-        viewModel.checkLogIn()
-        viewModel.checkLogIn.observe(this) { isLoggedIn ->
-            if (!isLoggedIn) {
-                startActivity(Intent(this, LogInActivity::class.java))
-            }
-        }
 
 //        drawerToggle = ActionBarDrawerToggle(
 //            this,

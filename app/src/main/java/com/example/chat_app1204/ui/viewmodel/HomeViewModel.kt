@@ -107,4 +107,24 @@ class HomeViewModel @Inject constructor(
         }
     }
 
+    fun getFriendsConversation() {
+        viewModelScope.launch {
+            myPreference.getId()?.let { userId ->
+                remoteDataSource.getFriendConversations(userId) {
+                    _conversations.value = it
+                }
+            }
+        }
+    }
+
+    fun getGroupConversation() {
+        viewModelScope.launch {
+            myPreference.getId()?.let { userId ->
+                remoteDataSource.getGroupConversations(userId) {
+                    _conversations.value = it
+                }
+            }
+        }
+    }
+
 }

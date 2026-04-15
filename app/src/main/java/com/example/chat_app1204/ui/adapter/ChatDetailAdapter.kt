@@ -1,19 +1,20 @@
 package com.example.chat_app1204.ui.adapter
 
-import android.util.Log
 import android.view.LayoutInflater
+import android.view.View
 import android.view.ViewGroup
 import androidx.recyclerview.widget.DiffUtil
 import androidx.recyclerview.widget.ListAdapter
 import androidx.recyclerview.widget.RecyclerView
 import com.bumptech.glide.Glide
+import com.example.chat_app1204.data.enums.MessageType
 import com.example.chat_app1204.data.model.Message
-
 import com.example.chat_app1204.databinding.ReceiverItemBinding
 import com.example.chat_app1204.databinding.SenderItemBinding
 
 class ChatDetailAdapter(
-    private val currentUserId: String
+    private val currentUserId: String,
+    private val onImageClick: (String) -> Unit
 ) :
     ListAdapter<Message, RecyclerView.ViewHolder>(MessageDiffCallback()) {
 
@@ -21,7 +22,6 @@ class ChatDetailAdapter(
         private const val TYPE_SENT = 1
         private const val TYPE_RECEIVED = 2
     }
-
 
     override fun getItemViewType(position: Int): Int {
         val message = getItem(position)
@@ -50,10 +50,36 @@ class ChatDetailAdapter(
             holder.bind(message)
         }
     }
+
     inner class SentViewHolder(private val binding: SenderItemBinding) :
         RecyclerView.ViewHolder(binding.root) {
         fun bind(message: Message) {
-            binding.textContent.text = message.message
+            binding.textContent.visibility = View.GONE
+            binding.card.visibility = View.GONE
+            binding.imageContent.setOnClickListener(null)
+
+            when (message.type) {
+                MessageType.TEXT.name -> {
+                    binding.textContent.visibility = View.VISIBLE
+                    binding.textContent.text = message.message.orEmpty()
+                }
+
+                MessageType.IMAGE.name -> {
+                    binding.card.visibility = View.VISIBLE
+                    Glide.with(itemView.context)
+                        .load(message.message)
+                        .into(binding.imageContent)
+
+                    binding.imageContent.setOnClickListener {
+                        onImageClick(message.message.orEmpty())
+                    }
+                }
+
+                else -> {
+                    // Keep both hidden for unknown types.
+                }
+            }
+
             Glide.with(itemView.context)
                 .load(message.avatarUrl)
                 .circleCrop()
@@ -64,8 +90,32 @@ class ChatDetailAdapter(
     inner class ReceivedViewHolder(private val binding: ReceiverItemBinding) :
         RecyclerView.ViewHolder(binding.root) {
         fun bind(message: Message) {
-            binding.textContent.text = message.message
-            Log.d("hai", "Friend avatar URL: ${message.avatarUrl}")
+            binding.textContent.visibility = View.GONE
+            binding.card.visibility = View.GONE
+            binding.imageContent.setOnClickListener(null)
+
+            when (message.type) {
+                MessageType.TEXT.name -> {
+                    binding.textContent.visibility = View.VISIBLE
+                    binding.textContent.text = message.message.orEmpty()
+                }
+
+                MessageType.IMAGE.name -> {
+                    binding.card.visibility = View.VISIBLE
+                    Glide.with(itemView.context)
+                        .load(message.message)
+                        .into(binding.imageContent)
+
+                    binding.imageContent.setOnClickListener {
+                        onImageClick(message.message.orEmpty())
+                    }
+                }
+
+                else -> {
+                    // Keep both hidden for unknown types.
+                }
+            }
+
             Glide.with(itemView.context)
                 .load(message.avatarUrl)
                 .circleCrop()
@@ -74,11 +124,11 @@ class ChatDetailAdapter(
     }
 }
 
-// DiffUtil để tối ưu hóa việc cập nhật danh sách
 class MessageDiffCallback : DiffUtil.ItemCallback<Message>() {
     override fun areItemsTheSame(oldItem: Message, newItem: Message): Boolean {
         return oldItem.id == newItem.id
     }
+
     override fun areContentsTheSame(oldItem: Message, newItem: Message): Boolean {
         return oldItem == newItem
     }
