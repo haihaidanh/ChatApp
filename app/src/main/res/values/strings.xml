@@ -1,0 +1,15 @@
+<resources>
+    <string name="app_name">chat_app1204</string>
+    <string name="open">Open</string>
+    <string name="close">Close</string>
+    <string name="logout">Đăng xuất</string>
+    <string name="setting">Cài đặt</string>
+    <string name="create_group">Tạo nhóm</string>
+    <string name="home">Trang chủ</string>
+    <string name="notification">Thông báo</string>
+    <string name="profile">Profile</string>
+    <string name="all">All</string>
+    <string name="chat">Chat</string>
+    <string name="groups">Groups</string>
+    <string name="type_message">Type Message...</string>
+</resources>

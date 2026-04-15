@@ -1,0 +1,21 @@
+<?xml version="1.0" encoding="utf-8"?>
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="wrap_content"
+    android:layout_height="wrap_content"
+    android:padding="8dp">
+
+    <ImageView
+        android:layout_width="60dp"
+        android:layout_height="60dp"
+        android:id="@+id/active_item_image"
+        android:scaleType="centerCrop"
+        android:contentDescription="@string/app_name"/>
+    <View
+        android:layout_width="15dp"
+        android:layout_height="15dp"
+        android:background="@drawable/active_light"
+        android:layout_alignBottom="@id/active_item_image"
+        android:layout_alignEnd="@id/active_item_image"
+        android:id="@+id/active_status_indicator"/>
+
+</RelativeLayout>
