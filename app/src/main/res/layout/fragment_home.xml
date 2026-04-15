@@ -18,22 +18,48 @@
             android:layout_alignParentTop="true"
             android:orientation="vertical">
 
-            <EditText
+            <RelativeLayout
                 android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:layout_marginStart="30dp"
-                android:layout_marginEnd="30dp"
-                android:layout_marginTop="10dp"
-                android:layout_marginBottom="10dp"
-                android:autofillHints="none"
-                android:background="@color/edt_color"
-                android:drawableStart="@drawable/baseline_search_24"
-                android:drawablePadding="10dp"
-                android:hint="@string/app_name"
-                android:inputType="text"
-                android:minHeight="48dp"
-                android:padding="15dp"
-                android:textSize="16sp" />
+                android:layout_height="70dp"
+                android:gravity="center_vertical"
+                android:background="@drawable/bg_layout"
+                android:elevation="1dp">
+                <ImageView
+                    android:id="@+id/menu_button"
+                    android:layout_width="40dp"
+                    android:layout_height="40dp"
+                    android:src="@drawable/baseline_menu_open_24"
+                    android:layout_margin="10dp"
+                    android:contentDescription="@string/app_name"
+                    app:tint="@color/base"
+                    android:layout_alignParentStart="true"/>
+
+
+                <EditText
+                    android:layout_width="0dp"
+                    android:layout_height="wrap_content"
+                    android:layout_marginTop="10dp"
+                    android:layout_marginBottom="10dp"
+                    android:autofillHints="none"
+                    android:background="@drawable/bg_edt"
+                    android:drawableStart="@drawable/baseline_search_24"
+                    android:drawablePadding="10dp"
+                    android:hint="@string/search"
+                    android:inputType="text"
+                    android:minHeight="48dp"
+                    android:padding="15dp"
+                    android:textSize="16sp"
+                    android:layout_toEndOf="@id/menu_button"
+                    android:layout_toStartOf="@id/imgAvatar"/>
+
+                <de.hdodenhof.circleimageview.CircleImageView
+                    android:id="@+id/imgAvatar"
+                    android:layout_width="40dp"
+                    android:layout_height="40dp"
+                    android:layout_margin="10dp"
+                    android:layout_alignParentEnd="true"/>
+            </RelativeLayout>
+
 
             <androidx.recyclerview.widget.RecyclerView
                 android:id="@+id/active_recycler_view"
@@ -41,57 +67,69 @@
                 android:layout_height="wrap_content"
                 android:orientation="horizontal"
                 app:layoutManager="androidx.recyclerview.widget.LinearLayoutManager"
-                tools:listitem="@layout/active_item" />
-
-            <com.google.android.material.chip.ChipGroup
-                android:id="@+id/chip"
+                tools:listitem="@layout/active_item"
+                android:elevation="1dp"
+                android:background="@drawable/bg_layout"/>
+            <LinearLayout
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:padding="8dp"
-                app:singleSelection="true"
-                app:selectionRequired="true">
+                android:orientation="vertical"
+                android:background="@drawable/bg_layout"
+                android:elevation="1dp"
+                android:layout_marginTop="5dp">
 
-                <com.google.android.material.chip.Chip
-                    android:id="@+id/chipAll"
-                    android:layout_width="wrap_content"
+                <com.google.android.material.chip.ChipGroup
+                    android:id="@+id/chip"
+                    android:layout_width="match_parent"
                     android:layout_height="wrap_content"
-                    android:text="@string/all"
-                    android:checkable="true"
-                    android:checked="true"
-                    app:chipBackgroundColor="@color/bg_chip"
-                    android:textColor="@color/text_chip"
-                    style="@style/Widget.MaterialComponents.Chip.Choice"/>
+                    android:padding="8dp"
+                    app:singleSelection="true"
+                    app:selectionRequired="true">
 
-                <com.google.android.material.chip.Chip
-                    android:id="@+id/chipChat"
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:text="@string/chat"
-                    android:checkable="true"
-                    app:chipBackgroundColor="@color/bg_chip"
-                    android:textColor="@color/text_chip"
-                    style="@style/Widget.MaterialComponents.Chip.Choice"/>
+                    <com.google.android.material.chip.Chip
+                        android:id="@+id/chipAll"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:text="@string/all"
+                        android:checkable="true"
+                        android:checked="true"
+                        app:chipBackgroundColor="@color/bg_chip"
+                        android:textColor="@color/text_chip"
+                        style="@style/Widget.MaterialComponents.Chip.Choice"/>
 
-                <com.google.android.material.chip.Chip
-                    android:id="@+id/chipGroup"
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:text="@string/groups"
-                    android:checkable="true"
-                    app:chipBackgroundColor="@color/bg_chip"
-                    android:textColor="@color/text_chip"
-                    style="@style/Widget.MaterialComponents.Chip.Choice"/>
+                    <com.google.android.material.chip.Chip
+                        android:id="@+id/chipChat"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:text="@string/chat"
+                        android:checkable="true"
+                        app:chipBackgroundColor="@color/bg_chip"
+                        android:textColor="@color/text_chip"
+                        style="@style/Widget.MaterialComponents.Chip.Choice"/>
 
-            </com.google.android.material.chip.ChipGroup>
+                    <com.google.android.material.chip.Chip
+                        android:id="@+id/chipGroup"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:text="@string/groups"
+                        android:checkable="true"
+                        app:chipBackgroundColor="@color/bg_chip"
+                        android:textColor="@color/text_chip"
+                        style="@style/Widget.MaterialComponents.Chip.Choice"/>
 
-            <androidx.recyclerview.widget.RecyclerView
-                android:id="@+id/user_recycler_view"
-                android:layout_width="match_parent"
-                android:layout_height="0dp"
-                android:layout_weight="1"
-                android:paddingTop="8dp"
-                app:layoutManager="androidx.recyclerview.widget.LinearLayoutManager"
-                tools:listitem="@layout/user_item" />
+                </com.google.android.material.chip.ChipGroup>
+
+                <androidx.recyclerview.widget.RecyclerView
+                    android:id="@+id/user_recycler_view"
+                    android:layout_width="match_parent"
+                    android:layout_height="0dp"
+                    android:layout_weight="1"
+                    android:paddingTop="8dp"
+                    app:layoutManager="androidx.recyclerview.widget.LinearLayoutManager"
+                    tools:listitem="@layout/user_item" />
+
+            </LinearLayout>
+
         </LinearLayout>
 
     </androidx.swiperefreshlayout.widget.SwipeRefreshLayout>

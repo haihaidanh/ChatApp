@@ -4,6 +4,8 @@ import android.content.Intent
 import android.os.Bundle
 import android.util.Log
 import android.view.View
+import androidx.core.view.GravityCompat
+import androidx.drawerlayout.widget.DrawerLayout
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.viewModels
 import androidx.navigation.fragment.findNavController
@@ -60,6 +62,31 @@ class HomeFragment : Fragment() {
             )
         }
 
+        mBinding.chip.setOnCheckedChangeListener { _, checkedId ->
+            when (checkedId) {
+                R.id.chipAll -> {
+
+                }
+
+                R.id.chipChat -> {
+                    mBinding.activeRecyclerView.visibility = View.VISIBLE
+                    mBinding.userRecyclerView.visibility = View.GONE
+                }
+                R.id.chipGroup -> {
+                    mBinding.activeRecyclerView.visibility = View.VISIBLE
+                    mBinding.userRecyclerView.visibility = View.GONE
+                }
+                else -> {
+
+                }
+            }
+        }
+
+        mBinding.menuButton.setOnClickListener {
+            requireActivity()
+                .findViewById<DrawerLayout>(R.id.drawer_layout)
+                .openDrawer(GravityCompat.START)
+        }
         viewModel.checkLogIn.observe(viewLifecycleOwner) { isLoggedIn ->
             if (!isLoggedIn) {
                 requireActivity().startActivity(

@@ -68,15 +68,15 @@ class MainActivity : AppCompatActivity() {
             }
         }
 
-        drawerToggle = ActionBarDrawerToggle(
-            this,
-            mBinding.drawerLayout,
-            mBinding.toolbar,
-            R.string.open,
-            R.string.close
-        )
-        mBinding.drawerLayout.addDrawerListener(drawerToggle)
-        drawerToggle.syncState()
+//        drawerToggle = ActionBarDrawerToggle(
+//            this,
+//            mBinding.drawerLayout,
+//            mBinding.toolbar,
+//            R.string.open,
+//            R.string.close
+//        )
+//        mBinding.drawerLayout.addDrawerListener(drawerToggle)
+//        drawerToggle.syncState()
 
 
         mBinding.navigationView.setNavigationItemSelectedListener { menuItem ->

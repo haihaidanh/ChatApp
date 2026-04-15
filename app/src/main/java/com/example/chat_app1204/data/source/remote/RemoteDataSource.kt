@@ -312,6 +312,8 @@ class RemoteDataSource @Inject constructor(
                     }
                 }
 
+                Log.d("hai", groupConvs.toString())
+
                 // 3. Kết hợp và sắp xếp
                 val allList = (personalConvs.awaitAll() + groupConvs.awaitAll())
                     .filterNotNull()
@@ -382,6 +384,7 @@ class RemoteDataSource @Inject constructor(
                 "seen" to false,
                 "senderId" to senderId,
                 "lastMessage" to message,
+                "seen" to false,
                 "lastMessageTime" to System.currentTimeMillis(),
                 "type" to type,
             )
@@ -412,6 +415,7 @@ class RemoteDataSource @Inject constructor(
             "senderId" to senderId,
             "receiverId" to receiverId,
             "lastMessage" to message,
+            "seen" to false,
             "timestamp" to System.currentTimeMillis(),
             "type" to type,
         )
@@ -527,5 +531,32 @@ class RemoteDataSource @Inject constructor(
         val snapshot = userRef.get().await()
         val user = snapshot.getValue(User::class.java)
         return user?.online ?: false
+    }
+
+    suspend fun seenMessage(userId: String, groupId: String?=null, friendId: String? = null) {
+
+        if(groupId != null){
+            val groupRef = firebaseDatabase.reference.child("groups").child(groupId).child("group_messages")
+            val snapshot = groupRef.get().await()
+            snapshot.children.forEach { messageSnapshot ->
+                messageSnapshot.ref.updateChildren(mapOf("seen" to true))
+            }
+
+            val conversationRef = firebaseDatabase.reference.child("conversations").child(groupId)
+            conversationRef.updateChildren(mapOf("seen" to true))
+            return
+        }
+
+        val chatId =
+            if (userId < friendId!!) "$userId-$friendId" else "$friendId-$userId"
+        val conversationRef = firebaseDatabase.reference.child("conversations").child(chatId)
+
+        conversationRef.updateChildren(mapOf("seen" to true))
+
+        val messagesRef = firebaseDatabase.reference.child("messages").child(chatId)
+        val snapshot = messagesRef.get().await()
+        snapshot.children.forEach { messageSnapshot ->
+            messageSnapshot.ref.updateChildren(mapOf("seen" to true))
+        }
     }
 }

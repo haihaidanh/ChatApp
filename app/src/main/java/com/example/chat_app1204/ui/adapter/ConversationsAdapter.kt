@@ -24,14 +24,22 @@ class ConversationsAdapter(
         private val imgAvatar: ImageView = itemView.findViewById(R.id.imgAvatar)
         private val tvUserName: TextView = itemView.findViewById(R.id.tvUserName)
         private val tvLastMessage: TextView = itemView.findViewById(R.id.tvLastMessage)
+        private val vStatus: View = itemView.findViewById(R.id.img_status_seen)
 
         fun bind(item: Conversation) {
             tvUserName.text = item.name
-            tvLastMessage.text = if(item.senderId == userId) "bạn: ${item.lastMessage}" else item.lastMessage
-            if(item.seen == true) {
+            if (item.groupId != null) {
+                tvLastMessage.text = item.lastMessage
+            } else {
+                tvLastMessage.text =
+                    if (item.senderId == userId) "bạn: ${item.lastMessage}" else item.lastMessage
+            }
+            if (item.seen == true || item.senderId == userId) {
                 tvLastMessage.setTypeface(null, android.graphics.Typeface.NORMAL)
+                vStatus.visibility = View.GONE
             } else {
                 tvLastMessage.setTypeface(null, android.graphics.Typeface.BOLD)
+                vStatus.visibility = View.VISIBLE
             }
 
             Glide.with(itemView.context)
@@ -40,7 +48,6 @@ class ConversationsAdapter(
                 .into(imgAvatar)
 
             itemView.setOnClickListener {
-                Log.d("hai", "Item clicked: $item")
                 onItemClick?.invoke(item)
             }
         }

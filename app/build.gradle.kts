@@ -136,6 +136,6 @@ dependencies {
     }
 
     implementation("de.hdodenhof:circleimageview:3.1.0")
-    implementation("com.github.Aghajari:AXEmojiView:1.5.2")
+    //implementation("com.github.Aghajari:AXEmojiView:1.5.2")
 
 }

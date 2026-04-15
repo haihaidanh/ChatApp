@@ -6,8 +6,7 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.example.chat_app1204.data.model.Conversation
 import com.example.chat_app1204.data.model.User
-import com.example.chat_app1204.data.repository.AuthRepository
-import com.example.chat_app1204.data.repository.FriendsRepository
+import com.example.chat_app1204.data.repository.ChatRepository
 import com.example.chat_app1204.data.source.local.MyPreference
 import com.example.chat_app1204.data.source.remote.RemoteDataSource
 import dagger.hilt.android.lifecycle.HiltViewModel
@@ -16,10 +15,9 @@ import javax.inject.Inject
 
 @HiltViewModel
 class HomeViewModel @Inject constructor(
-    private val friendsRepository: FriendsRepository,
     private val myPreference: MyPreference,
     private val remoteDataSource: RemoteDataSource,
-    private val authRepository: AuthRepository,
+    private val chatRepository: ChatRepository
 ) : ViewModel() {
 
     private val _friendList = MutableLiveData<List<User>>()
@@ -48,7 +46,7 @@ class HomeViewModel @Inject constructor(
         }
     }
 
-    fun getFriends(){
+    fun getFriends() {
         viewModelScope.launch {
             val userId = myPreference.getId() ?: ""
             remoteDataSource.getFriends(userId) {
@@ -98,6 +96,14 @@ class HomeViewModel @Inject constructor(
         viewModelScope.launch {
             val avatarUrl = myPreference.getAvatarUrl()
             _avatar.value = avatarUrl
+        }
+    }
+
+    fun seenMessage(groupId: String? = null, friendId: String? = null) {
+        viewModelScope.launch {
+            myPreference.getId()?.let { userId ->
+                chatRepository.seenMessage(userId, groupId, friendId)
+            }
         }
     }
 

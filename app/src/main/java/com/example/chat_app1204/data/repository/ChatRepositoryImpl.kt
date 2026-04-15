@@ -29,5 +29,8 @@ class ChatRepositoryImpl @Inject constructor(
         TODO("Not yet implemented")
     }
 
+    override suspend fun seenMessage(userId: String, groupId: String?, friendId: String?) {
+        remoteDataSource.seenMessage(userId, groupId, friendId)
+    }
 
 }

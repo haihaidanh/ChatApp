@@ -43,9 +43,9 @@ class ChatDetailFragment : Fragment() {
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
 
-        var avatar:String? = null
+        var avatar: String? = null
         val conservation = arguments?.getSerializable("conversation") as? Conversation
-        //Log.d("hai", "Conversation: ${conservation?.groupId}")
+
         viewModel.getAvatarUrl()
         viewModel.avatar.observe(viewLifecycleOwner) { avatarUrl ->
             avatar = avatarUrl
@@ -56,6 +56,14 @@ class ChatDetailFragment : Fragment() {
         } else {
             conservation?.senderId
         }
+
+        conservation?.let {
+            viewModel.seenMessage(
+                it.groupId,
+                receiverId,
+            )
+        }
+
         receiverId?.let {
             chatDetailViewModel.checkStatus(it)
         }
@@ -94,7 +102,7 @@ class ChatDetailFragment : Fragment() {
         )
         chatDetailViewModel.messages.observe(viewLifecycleOwner) { messages ->
             //Log.d("hai", "Messages: $messages")
-            chatAdapter.submitList(messages){
+            chatAdapter.submitList(messages) {
                 val size = messages.size
                 if (size > 0) {
                     mBinding.chatRecyclerView.smoothScrollToPosition(messages.size - 1)
@@ -104,12 +112,13 @@ class ChatDetailFragment : Fragment() {
         }
 
         //Log.d("hai", "Receiver ID: $receiverId")
+        viewModel.getUserId()?.let { userId ->
             mBinding.btnSend.setOnClickListener {
                 Log.d("hai", avatar ?: "Avatar URL is null")
                 val message = mBinding.etMessage.text.toString()
-                if (message.isNotBlank() ) {
+                if (message.isNotBlank()) {
                     chatDetailViewModel.sendMessage(
-                        senderId = viewModel.getUserId() ?: "",
+                        senderId = userId,
                         receiverId = receiverId,
                         type = MessageType.TEXT.name,
                         groupId = conservation?.groupId,
@@ -119,13 +128,24 @@ class ChatDetailFragment : Fragment() {
                     )
                     mBinding.etMessage.text.clear()
                 }
+            }
 
         }
 
         mBinding.voiceCallButton.setOnClickListener {
             requireActivity().startActivity(Intent(requireContext(), CallActivity::class.java))
         }
-
-
+        mBinding.chatOption.setOnClickListener {
+            mBinding.chatOption.visibility = View.GONE
+            mBinding.stickerOption.visibility = View.VISIBLE
+            mBinding.imageOption.visibility = View.VISIBLE
+        }
+        mBinding.etMessage.setOnFocusChangeListener { v, hasFocus ->
+            if (hasFocus) {
+                mBinding.chatOption.visibility = View.VISIBLE
+                mBinding.stickerOption.visibility = View.GONE
+                mBinding.imageOption.visibility = View.GONE
+            }
+        }
     }
 }
